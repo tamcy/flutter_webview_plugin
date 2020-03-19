@@ -1,14 +1,22 @@
 package com.flutter_webview_plugin;
 
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
+import android.webkit.URLUtil;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,13 +27,15 @@ import java.util.regex.Pattern;
 
 public class BrowserClient extends WebViewClient {
     private Pattern invalidUrlPattern = null;
+    private Context context;
 
-    public BrowserClient() {
-        this(null);
+    public BrowserClient(final Context context) {
+        this(context, null);
     }
 
-    public BrowserClient(String invalidUrlRegex) {
+    public BrowserClient(final Context context, String invalidUrlRegex) {
         super();
+        this.context = context;
         if (invalidUrlRegex != null) {
             invalidUrlPattern = Pattern.compile(invalidUrlRegex);
         }
@@ -64,9 +74,21 @@ public class BrowserClient extends WebViewClient {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+        Uri uri = request.getUrl();
+        String url = uri.toString();
+        if (!URLUtil.isNetworkUrl(url)) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            List<ResolveInfo> resolvedActivities = context.getPackageManager().queryIntentActivities(intent, 0);
+            if(resolvedActivities.size() > 0) {
+                context.startActivity(intent);
+            } else {
+                Log.w("BrowserClient", "No activity found for the non-network URL " + url);
+            }
+            return true;
+        }
+
         // returning true causes the current WebView to abort loading the URL,
         // while returning false causes the WebView to continue loading the URL as usual.
-        String url = request.getUrl().toString();
         boolean isInvalid = checkInvalidUrl(url);
         Map<String, Object> data = new HashMap<>();
         data.put("url", url);

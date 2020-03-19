@@ -133,7 +133,7 @@ class WebviewManager {
         this.context = context;
         this.resultHandler = new ResultHandler();
         this.platformThreadHandler = new Handler(context.getMainLooper());
-        webViewClient = new BrowserClient() {
+        webViewClient = new BrowserClient(context) {
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 if (ignoreSSLErrors){
