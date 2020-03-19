@@ -79,7 +79,7 @@ class WebviewScaffold extends StatefulWidget {
   _WebviewScaffoldState createState() => _WebviewScaffoldState();
 }
 
-class _WebviewScaffoldState extends State<WebviewScaffold> {
+class _WebviewScaffoldState extends State<WebviewScaffold> with WidgetsBindingObserver {
   final webviewReference = FlutterWebviewPlugin();
   Rect _rect;
   Timer _resizeTimer;
@@ -90,6 +90,8 @@ class _WebviewScaffoldState extends State<WebviewScaffold> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
     webviewReference.close();
 
     _onBack = webviewReference.onBack.listen((_) async {
@@ -132,6 +134,7 @@ class _WebviewScaffoldState extends State<WebviewScaffold> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
     _onBack?.cancel();
     _resizeTimer?.cancel();
@@ -196,6 +199,15 @@ class _WebviewScaffoldState extends State<WebviewScaffold> {
             const Center(child: const CircularProgressIndicator()),
       ),
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      webviewReference.onPaused();
+    } else if (state == AppLifecycleState.resumed) {
+      webviewReference.onResumed();
+    }
   }
 }
 

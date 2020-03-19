@@ -282,6 +282,12 @@ class FlutterWebviewPlugin {
   Future<Null> stopLoading() async =>
       await _channel.invokeMethod('stopLoading');
 
+  Future<Null> onPaused() async =>
+      await _channel.invokeMethod('onPaused');
+
+  Future<Null> onResumed() async =>
+      await _channel.invokeMethod('onResumed');
+
   /// Close all Streams
   void dispose() {
     _onDestroy.close();

@@ -94,6 +94,12 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
             case "cleanCache":
                 cleanCache(result);
                 break;
+            case "onPaused":
+                onPaused(result);
+                break;
+            case "onResumed":
+                onResumed(result);
+                break;
             default:
                 result.notImplemented();
                 break;
@@ -103,6 +109,18 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
     private void cleanCache(MethodChannel.Result result) {
         webViewManager.cleanCache();
         WebStorage.getInstance().deleteAllData();
+        result.success(null);
+    }
+
+    private void onPaused(MethodChannel.Result result) {
+        webViewManager.webView.onPause();
+        webViewManager.webView.pauseTimers();
+        result.success(null);
+    }
+
+    private void onResumed(MethodChannel.Result result) {
+        webViewManager.webView.onResume();
+        webViewManager.webView.resumeTimers();
         result.success(null);
     }
 

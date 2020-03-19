@@ -79,6 +79,10 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
         [self onCanGoForward:call result:result];
     } else if ([@"cleanCache" isEqualToString:call.method]) {
         [self cleanCache:result];
+    } else if ([@"onPaused" isEqualToString:call.method]) {
+        result(nil);
+    } else if ([@"onResumed" isEqualToString:call.method]) {
+        result(nil);
     } else {
         result(FlutterMethodNotImplemented);
     }
